@@ -1,170 +1,168 @@
-# VLC – PPM Signal Generator (Analog Discovery 2)
+# VLC – PPM-Signalgenerator (Analog Discovery 2)
 
-A Python-based Pulse Position Modulation (PPM) signal generator that uses the **Digilent Analog Discovery 2** as the hardware signal output device.
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [How PPM Works](#how-ppm-works)
-3. [Hardware Requirements](#hardware-requirements)
-4. [Software Prerequisites](#software-prerequisites)
-5. [File Structure](#file-structure)
-6. [Configuration](#configuration)
-7. [Running the Program](#running-the-program)
-8. [Using the Program](#using-the-program)
-9. [Troubleshooting](#troubleshooting)
+Ein Python-basierter Pulspositionsmodulations-Signalgenerator (PPM), der den **Digilent Analog Discovery 2** als Hardware-Ausgabegerat verwendet.
 
 ---
 
-## Overview
+## Inhaltsverzeichnis
 
-This program generates a PPM (Pulse Position Modulation) waveform from a binary bitstream entered by the user, and outputs it in real time via the **Arbitrary Waveform Generator (AWG)** channel of the Analog Discovery 2.
-
-The main entry point is **`main_PPM.py`**, located in the `VLC_Waveform SDK/` directory.
+1. [Uebersicht](#uebersicht)
+2. [Funktionsweise von PPM](#funktionsweise-von-ppm)
+3. [Hardwareanforderungen](#hardwareanforderungen)
+4. [Softwarevoraussetzungen](#softwarevoraussetzungen)
+5. [Dateistruktur](#dateistruktur)
+6. [Konfiguration](#konfiguration)
+7. [Programm starten](#programm-starten)
+8. [Programm verwenden](#programm-verwenden)
+9. [Fehlerbehebung](#fehlerbehebung)
 
 ---
 
-## How PPM Works
+## Uebersicht
 
-In PPM, each bit is represented by a pulse placed at a specific position within a fixed time slot:
+Dieses Programm erzeugt ein PPM-Signal (Pulspositionsmodulation) aus einer vom Benutzer eingegebenen binaeren Bitfolge und gibt es in Echtzeit ueber den **Arbitrary Waveform Generator (AWG)** des Analog Discovery 2 aus.
 
-| Bit | Pulse position |
+Der Einstiegspunkt des Programms ist **`main_PPM.py`** im Verzeichnis `VLC_Waveform SDK/`.
+
+---
+
+## Funktionsweise von PPM
+
+Bei PPM wird jedes Bit durch einen Impuls dargestellt, der an einer bestimmten Position innerhalb eines festen Zeitfensters platziert wird:
+
+| Bit | Impulsposition |
 |-----|----------------|
-| `0` | Pulse at the **start** of the bit slot |
-| `1` | Pulse at the **middle** of the bit slot |
+| `0` | Impuls am **Anfang** des Zeitfensters |
+| `1` | Impuls in der **Mitte** des Zeitfensters |
 
-The default voltage is `+1 V` for pulses and `0 V` for the rest level.  
-Timing and amplitude are fully configurable in `config.py`.
-
----
-
-## Hardware Requirements
-
-- **Digilent Analog Discovery 2** (AD2) – USB-connected multi-function instrument  
-  - Used as an Arbitrary Waveform Generator (AWG) to output the PPM signal on its **Analog Out Channel 1 (W1)**  
-- A USB cable to connect the AD2 to your PC
+Die Standardspannung betraegt `+1 V` fuer Impulse und `0 V` fuer den Ruhepegel.
+Zeitverhalten und Amplitude sind vollstaendig in `config.py` konfigurierbar.
 
 ---
 
-## Software Prerequisites
+## Hardwareanforderungen
+
+- **Digilent Analog Discovery 2** (AD2) – USB-Multifunktionsinstrument
+  - Wird als Arbitrary Waveform Generator (AWG) verwendet, um das PPM-Signal am **Analogausgang Kanal 1 (W1)** auszugeben
+- Ein USB-Kabel zur Verbindung des AD2 mit dem PC
+
+---
+
+## Softwarevoraussetzungen
 
 ### 1. WaveForms (Digilent SDK)
 
-The program relies on the **DWF (Device WaveForms) shared library** (`dwf.dll` on Windows, `libdwf.so` on Linux, `libdwf.dylib` on macOS).
+Das Programm benoetigt die **DWF-Bibliothek (Device WaveForms)** (`dwf.dll` unter Windows, `libdwf.so` unter Linux, `libdwf.dylib` unter macOS).
 
-Download and install **WaveForms** from Digilent's website:  
-👉 https://digilent.com/reference/software/waveforms/waveforms-3/start
+WaveForms kann von der Digilent-Website heruntergeladen und installiert werden:
+https://digilent.com/reference/software/waveforms/waveforms-3/start
 
-> **Important:** Close the WaveForms desktop application before running any Python script, as WaveForms and a Python script cannot both control the device at the same time.
+> **Wichtig:** Die WaveForms-Desktopanwendung muss geschlossen sein, bevor ein Python-Skript ausgefuehrt wird, da WaveForms und ein Python-Skript das Geraet nicht gleichzeitig steuern koennen.
 
 ### 2. Python 3
 
-Install Python 3 (version 3.7 or later recommended).
+Python 3 installieren (Version 3.7 oder hoeher empfohlen).
 
-### 3. Python Packages
+### 3. Python-Pakete
 
-Install the required packages:
+Das benoetigt Paket installieren:
 
 ```bash
 pip install matplotlib
 ```
 
-> `ctypes` and `time` are part of the Python standard library and do not need to be installed separately.
+> `ctypes` und `time` sind Bestandteil der Python-Standardbibliothek und muessen nicht separat installiert werden.
 
 ---
 
-## File Structure
+## Dateistruktur
 
 ```
 VLC_Waveform SDK/
-├── main_PPM.py          ← Main script – run this file
-├── PPM.py               ← PPM signal generation logic
-├── config.py            ← All configurable parameters and device setup
-├── wavegen.py           ← Low-level waveform generator helpers (SDK-style)
-├── device.py            ← Device open/close/error-check helpers
-├── dwfconstants.py      ← DWF library constants
-├── main.py              ← Standalone demo: custom square wave (separate test)
-└── waveform_data.csv    ← (optional) Exported waveform samples
++-- main_PPM.py          <- Hauptskript – diese Datei ausfuehren
++-- PPM.py               <- Logik zur PPM-Signalerzeugung
++-- config.py            <- Alle konfigurierbaren Parameter und Geraeteeinrichtung
++-- wavegen.py           <- Low-Level-Hilfsfunktionen fuer den Waveformgenerator (SDK-Stil)
++-- device.py            <- Hilfsfunktionen fuer Gerateverbindung, -trennung und Fehlerbehandlung
++-- dwfconstants.py      <- DWF-Bibliothekskonstanten
++-- main.py              <- Eigenstaendige Demo: benutzerdefinierte Rechteckwelle (separater Test)
++-- waveform_data.csv    <- (optional) Exportierte Wellenformdaten
 ```
 
 ---
 
-## Configuration
+## Konfiguration
 
-Before running the program, review and adjust the parameters in **`config.py`** to match your setup:
+Vor dem Starten des Programms sollten die Parameter in **`config.py`** geprueft und bei Bedarf angepasst werden:
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `DESIRED_PEAK_VOLTAGE` | `1.0` V | Pulse amplitude |
-| `REST_LEVEL` | `0.0` V | Voltage when no pulse is sent |
-| `BIT_DURATION` | `1e-6` s (1 µs) | Duration of each bit slot |
-| `PULSE_WIDTH` | `BIT_DURATION / 2` | Width of each pulse |
-| `SAMPLES_PER_BIT_GEN` | `2048` | AWG samples per bit (determines sample rate) |
-| `LOOP_CONTINUOUSLY` | `True` | Repeat the waveform indefinitely (`True`) or once (`False`) |
-| `CHANNEL_AWG` | `0` | AWG output channel (0 = W1) |
-| `save_to_CSV` | `False` | Set to `True` in `main_PPM.py` to save samples to `waveform_data.csv` |
-| `diagnostic` | `False` | Set to `True` in `main_PPM.py` to print signal details to the console |
+| Parameter | Standardwert | Beschreibung |
+|-----------|--------------|--------------|
+| `DESIRED_PEAK_VOLTAGE` | `1.0` V | Impulsamplitude |
+| `REST_LEVEL` | `0.0` V | Spannung waehrend des Ruhepegels (kein Impuls) |
+| `BIT_DURATION` | `1e-6` s (1 µs) | Dauer eines Bit-Zeitfensters |
+| `PULSE_WIDTH` | `BIT_DURATION / 2` | Impulsbreite innerhalb eines Zeitfensters |
+| `SAMPLES_PER_BIT_GEN` | `2048` | AWG-Abtastwerte pro Bit (bestimmt die Abtastrate) |
+| `LOOP_CONTINUOUSLY` | `True` | Wellenform unbegrenzt wiederholen (`True`) oder einmalig ausgeben (`False`) |
+| `CHANNEL_AWG` | `0` | AWG-Ausgangskanal (0 = W1) |
+| `save_to_CSV` | `False` | Auf `True` setzen in `main_PPM.py`, um Abtastwerte in `waveform_data.csv` zu speichern |
+| `diagnostic` | `False` | Auf `True` setzen in `main_PPM.py`, um Signaldetails in der Konsole auszugeben |
 
 ---
 
-## Running the Program
+## Programm starten
 
-1. **Connect** the Analog Discovery 2 to your computer via USB.
-2. **Close** the WaveForms desktop application if it is open.
-3. Open a terminal and navigate to the SDK folder:
+1. Den Analog Discovery 2 per USB mit dem Computer verbinden.
+2. Die WaveForms-Desktopanwendung schliessen, falls sie geoeffnet ist.
+3. Ein Terminal oeffnen und in den SDK-Ordner wechseln:
 
    ```bash
    cd "VLC_Waveform SDK"
    ```
 
-4. Run the main script:
+4. Das Hauptskript ausfuehren:
 
    ```bash
    python main_PPM.py
    ```
 
-   On success, you will see:
+   Bei Erfolg erscheint folgende Ausgabe:
 
    ```
    Device opened successfully.
    Bitfolge in Zahlen eintragen...
    ```
 
-   > The prompt "Bitfolge in Zahlen eintragen..." means "Enter bit sequence as numbers..." in German.
-
 ---
 
-## Using the Program
+## Programm verwenden
 
-Once the program starts, it enters an interactive loop:
+Nach dem Start wechselt das Programm in eine interaktive Schleife:
 
-1. **Enter a binary bitstream** when prompted (the prompt reads "Bitfolge in Zahlen eintragen...", meaning "Enter bit sequence as numbers...") – type a sequence of `0`s and `1`s, for example:
+1. Eine binaere Bitfolge eingeben, wenn der Prompt erscheint – eine Folge aus `0` und `1`, zum Beispiel:
 
    ```
    Bitfolge in Zahlen eintragen...01101001
    ```
 
-2. The program will:
-   - Generate the corresponding PPM waveform
-   - Output the signal on the AWG channel (W1) of the Analog Discovery 2
-   - Wait for the signal duration to complete, then prompt again
+2. Das Programm fuehrt anschliessend folgende Schritte aus:
+   - Es erzeugt die entsprechende PPM-Wellenform
+   - Es gibt das Signal ueber den AWG-Kanal (W1) des Analog Discovery 2 aus
+   - Es wartet, bis die Signaldauer abgelaufen ist, und fragt dann erneut nach einer Eingabe
 
-3. **Repeat** with a new bitstream as many times as needed.
+3. Den Vorgang mit einer neuen Bitfolge beliebig oft wiederholen.
 
-4. To **stop** the program, press `Ctrl+C`. The AWG output will be stopped and the device will be closed cleanly.
+4. Das Programm mit `Ctrl+C` beenden. Der AWG-Ausgang wird gestoppt und das Geraet ordnungsgemaess getrennt.
 
-> **Tip:** You can observe the generated waveform using the Analog Discovery 2's oscilloscope input (Channel 1 / 1+) and the WaveForms Scope instrument — but only after stopping `main_PPM.py`, since only one application can control the device at a time.
+> **Hinweis:** Das erzeugte Signal kann mit dem Oszilloskopeingang des Analog Discovery 2 (Kanal 1 / 1+) und dem WaveForms-Scope-Instrument beobachtet werden – jedoch erst nach dem Beenden von `main_PPM.py`, da jeweils nur eine Anwendung das Geraet steuern kann.
 
 ---
 
-## Troubleshooting
+## Fehlerbehebung
 
-| Problem | Solution |
-|---------|----------|
-| `Failed to open device` | Make sure the AD2 is connected via USB and WaveForms is closed |
-| `Could not load dwf library` | Install WaveForms from Digilent; ensure the DWF library is in your system PATH |
-| `No device detected` | Try a different USB port or cable; check Device Manager / `lsusb` |
-| Script hangs or no output | Verify `BIT_DURATION` and bitstream length are not too large |
-| `ModuleNotFoundError: matplotlib` | Run `pip install matplotlib` |
+| Problem | Loesung |
+|---------|---------|
+| `Failed to open device` | Sicherstellen, dass der AD2 per USB verbunden und WaveForms geschlossen ist |
+| `Could not load dwf library` | WaveForms von Digilent installieren; sicherstellen, dass die DWF-Bibliothek im System-PATH vorhanden ist |
+| `No device detected` | Einen anderen USB-Anschluss oder ein anderes Kabel verwenden; Geraetemanager bzw. `lsusb` pruefen |
+| Skript haengt oder keine Ausgabe | `BIT_DURATION` und Bitfolgenlange pruefen; diese sollten nicht zu gross sein |
+| `ModuleNotFoundError: matplotlib` | `pip install matplotlib` ausfuehren |
