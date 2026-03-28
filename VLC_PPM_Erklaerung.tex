@@ -1,0 +1,206 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{parskip}
+
+\title{Visible Light Communication\\[0.4em]
+  \large Tiefpasseffekte und Konsequenzen für die PPM-Modulation}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+Dein beobachtetes Verhalten ist absolut typisch für Visible Light Communication (VLC)
+und lässt sich sehr gut aus Sicht der Hochfrequenz- und Systemtechnik erklären.
+
+% ------------------------------------------------------------------
+\section*{Warum dein Rechteck zu \enquote{Haifischflossen} wird}
+
+In deiner gesamten Übertragungsstrecke wirken mehrere Komponenten wie \textbf{Tiefpassfilter}:
+
+\begin{itemize}
+  \item Treiberschaltung (Transistor + hohe Spannung)
+  \item LED/Leuchte
+  \item Photodiode + TIA (Transimpedanzverstärker)
+  \item Leitungen und parasitäre Kapazitäten
+\end{itemize}
+
+Ein ideales Rechtecksignal besteht aus \textbf{sehr vielen hohen Frequenzanteilen} (Oberwellen).
+Ein Tiefpass dämpft genau diese hohen Frequenzen.
+
+\textbf{Ergebnis:}
+\begin{itemize}
+  \item Flanken werden \textbf{abgerundet}
+  \item Anstiege werden \textbf{langsamer}
+  \item Statt Rechteck bekommst du exponentielle Anstiege/Abfälle
+        $\rightarrow$ \enquote{Haifischflossen}
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section*{Was bedeutet das konkret für PPM (Pulse Position Modulation)?}
+
+Bei \textbf{PPM} ist \textbf{nicht die Amplitude entscheidend}, sondern:
+
+\begin{quote}
+  $\rightarrow$ \textbf{der exakte Zeitpunkt eines Pulses}
+\end{quote}
+
+Und genau hier entsteht dein Problem.
+
+% ------------------------------------------------------------------
+\section*{Konsequenzen der Tiefpass-Effekte für PPM}
+
+\subsection*{1.\ Zeitliche Verschiebung (Jitter\,/\,Delay)}
+
+Durch die langsamen Flanken:
+
+\begin{itemize}
+  \item Der Puls erreicht den Schwellwert \textbf{später}
+  \item $\rightarrow$ Der gemessene Zeitpunkt ist \textbf{verschoben}
+\end{itemize}
+
+Bei PPM führt das direkt zu:
+
+\begin{itemize}
+  \item falscher Symbolinterpretation
+  \item Bitfehlern
+\end{itemize}
+
+% ------------------------------------------------------------------
+\subsection*{2.\ Pulsverbreiterung (Inter-Symbol Interference, ISI)}
+
+Da dein Signal nicht sofort wieder auf~0 fällt:
+
+\begin{itemize}
+  \item Ein Puls \enquote{zieht sich} in das nächste Zeitfenster hinein
+  \item $\rightarrow$ Symbole beeinflussen sich gegenseitig
+\end{itemize}
+
+Besonders kritisch bei:
+
+\begin{itemize}
+  \item hohen Datenraten
+  \item kurzen Symbolzeiten
+\end{itemize}
+
+% ------------------------------------------------------------------
+\subsection*{3.\ Amplitudenreduktion}
+
+Durch die Filterung:
+
+\begin{itemize}
+  \item Pulse werden kleiner
+  \item $\rightarrow$ schlechteres Signal-Rausch-Verhältnis (SNR)
+\end{itemize}
+
+Folge:
+
+\begin{itemize}
+  \item Schwellwert-Detektion wird unsicher
+\end{itemize}
+
+% ------------------------------------------------------------------
+\subsection*{4.\ Verlust der Pulsform}
+
+PPM geht davon aus:
+
+\begin{itemize}
+  \item klare, schmale Pulse
+\end{itemize}
+
+Tatsächlich bekommst du:
+
+\begin{itemize}
+  \item asymmetrische, verzerrte Pulse (\enquote{Haifischflossen})
+\end{itemize}
+
+Das erschwert:
+
+\begin{itemize}
+  \item Synchronisation
+  \item saubere Slot-Erkennung
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section*{Intuitive Zusammenfassung}
+
+Dein System verhält sich wie:
+
+\begin{quote}
+  Ein langsames System versucht, schnelle Information zu übertragen.
+\end{quote}
+
+Und PPM ist besonders empfindlich, weil:
+
+\begin{itemize}
+  \item \textbf{Zeitinformation} übertragen wird
+  \item nicht nur \enquote{Signal da\,/\,nicht da}
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section*{Was heißt das praktisch für dich?}
+
+\subsection*{Ohne Gegenmaßnahmen}
+
+\begin{itemize}
+  \item steigende Bitfehlerrate (BER)
+  \item limitierte maximale Datenrate
+  \item instabile Dekodierung
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section*{Typische Lösungen\,/\,Gegenmaßnahmen}
+
+\subsection*{1.\ Bandbreite erhöhen}
+
+\begin{itemize}
+  \item schnellere LED\,/\,Treiber
+  \item schnellerer TIA
+  \item kleinere parasitäre Kapazitäten
+\end{itemize}
+
+\subsection*{2.\ Entzerrung (Equalization)}
+
+\begin{itemize}
+  \item Vorverzerrung am Sender (Pre-Emphasis)
+  \item oder digitale Nachbearbeitung
+\end{itemize}
+
+\subsection*{3.\ Angepasste Modulation}
+
+\begin{itemize}
+  \item größere Zeitabstände bei PPM
+  \item oder robustere Verfahren:
+    \begin{itemize}
+      \item OOK (On-Off Keying)
+      \item DCO-OFDM (in komplexeren VLC-Systemen)
+    \end{itemize}
+\end{itemize}
+
+\subsection*{4.\ Schwellwert-Optimierung}
+
+\begin{itemize}
+  \item adaptive Thresholds statt fixer Werte
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section*{Fazit}
+
+Die \enquote{Haifischflossen} sind kein Fehler, sondern ein Hinweis:
+
+\begin{quote}
+  $\rightarrow$ \textbf{Dein System ist bandbreitenbegrenzt.}
+\end{quote}
+
+Für PPM bedeutet das konkret:
+
+Die Information (Zeitposition der Pulse) wird durch Verzögerung, Verbreiterung und Verzerrung
+verfälscht -- was direkt zu Dekodierfehlern führt.
+
+\end{document}
